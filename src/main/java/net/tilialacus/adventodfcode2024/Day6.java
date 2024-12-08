@@ -12,7 +12,6 @@ public class Day6 {
         var visited = new Boolean[map.length][map[0].length];
 
         var guard = findGuard(map);
-
         visited[guard.row][guard.col] = true;
 
         while (guard.move(map)) {
@@ -23,6 +22,25 @@ public class Day6 {
                 .flatMap(Arrays::stream)
                 .filter(TRUE::equals)
                 .count());
+
+        var possible = 0L;
+        for (int row = 0; row < visited.length; row++) {
+            next: for (int col = 0; col < visited.length; col++) {
+                if (visited[row][col] == TRUE) {
+                    var futureGuard = findGuard(map);
+                    if ("#^>v<".indexOf(map[row][col]) == -1) {
+                        map[row][col] = '#';
+                        int maxSteps = map.length * map[0].length;
+                        while (futureGuard.move(map) && --maxSteps> 0) {}
+                        if (maxSteps == 0) {
+                            possible++;
+                        }
+                        map[row][col] = '.';
+                    }
+                }
+            }
+        }
+        System.err.println("Day 6 part 2: " + possible);
     }
 
     private static Guard findGuard(char[][] map) {
