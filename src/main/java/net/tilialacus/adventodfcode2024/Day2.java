@@ -1,6 +1,7 @@
 package net.tilialacus.adventodfcode2024;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.lang.Math.abs;
 import static net.tilialacus.adventodfcode2024.ScanInput.inputAsLines;
@@ -17,6 +18,7 @@ public class Day2 {
         );
 
         System.err.println("Part 1: " + reports.stream().filter(Report::isSafe).count());
+        System.err.println("Part 2: " + reports.stream().filter(Report::isDampenerSafe).count());
     }
 
     private static class Report {
@@ -27,17 +29,43 @@ public class Day2 {
         }
 
         public boolean isSafe() {
-            // Assume a lot
-            boolean increasing = true;
-            boolean decreasing = true;
-            boolean safe = true;
-            for (int i = 1; i < levels.length; i++) {
-                increasing = increasing && levels[i] > levels[i - 1];
-                decreasing = decreasing && levels[i] < levels[i - 1];
-                safe = safe && abs(levels[i] - levels[i - 1]) < 4;
-            }
+            return isSafe(levels);
+        }
 
-            return (increasing || decreasing) && safe;
+        public boolean isDampenerSafe() {
+            if (isSafe(levels)) {
+                return true;
+            } else {
+                for (int i = 0; i < levels.length; i++) {
+                    var n = Arrays.copyOf(levels, levels.length -1);
+                    System.arraycopy(levels, 0, n, 0, i);
+                    System.arraycopy(levels, i+1, n, i, levels.length - i-1);
+
+                    if (isSafe(n)) {
+                        return true;
+                    };
+                }
+                return false;
+            }
+        }
+
+        private boolean isSafe(long[] input) {
+            // Assume a lot
+            int increasing = 0;
+            int decreasing = 0;
+            for (int i = 1; i < input.length; i++) {
+                if (input[i] > input[i - 1]) {
+                    increasing++;
+                };
+                if (input[i] < input[i - 1]) {
+                    decreasing++;
+                };
+                long diff = abs(input[i] - input[i - 1]);
+                if ((increasing < i && decreasing < i) || (diff < 1 || diff > 3)) {
+                    return false;
+                };
+            }
+            return true;
         }
     }
 }
