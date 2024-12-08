@@ -44,4 +44,15 @@ public class ScanInput {
             throw new RuntimeException(e);
         }
     }
+
+    public static char[][] inputAsArray(String name) {
+        Path path = Path.of(name);
+        try {
+            return Files.lines(path)
+                    .map(String::toCharArray)
+                    .toArray(char[][]::new);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
