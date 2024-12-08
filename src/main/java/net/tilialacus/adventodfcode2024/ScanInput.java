@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ScanInput {
     public static void scanInput(String name, Consumer<Scanner> consumer) {
@@ -51,6 +53,15 @@ public class ScanInput {
             return Files.lines(path)
                     .map(String::toCharArray)
                     .toArray(char[][]::new);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> Stream<T> mapInput(String name, Function<String, T> mapper) {
+        Path path = Path.of(name);
+        try {
+            return Files.lines(path).map(mapper);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
