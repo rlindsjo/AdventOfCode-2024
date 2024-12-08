@@ -1,9 +1,6 @@
 package net.tilialacus.adventodfcode2024;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
@@ -32,7 +29,46 @@ public class Day5 {
                 .mapToLong(Long::parseLong)
                 .sum();
 
+        var validMiddleSumCorrected = updates.stream().filter(Predicate.not(new UpdateValidator(before, after)))
+                .map(new Sorter(before, after)::sort)
+                .map(it -> it.get(it.size() / 2))
+                .mapToLong(Long::parseLong)
+                .sum();
+
         System.err.println(validMiddleSum);
+        System.err.println(validMiddleSumCorrected);
+    }
+
+    private static class Sorter implements Comparator<String> {
+        private final HashMap<String, List<String>> before;
+        private final HashMap<String, List<String>> after;
+
+        public Sorter(HashMap<String, List<String>> before, HashMap<String, List<String>> after) {
+            this.before = before;
+            this.after = after;
+        }
+
+
+        public List<String> sort(List<String> update) {
+            return update.stream()
+                    .sorted(this)
+                    .toList();
+        }
+
+        @Override
+        public int compare(String p1, String p2) {
+            if (before.getOrDefault(p1, emptyList()).contains(p2)) {
+                return 1;
+            } else if (after.getOrDefault(p1, emptyList()).contains(p2)) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    private static Object fixSorting(List<String> update) {
+        return null;
     }
 
     private static class UpdateValidator implements Predicate<List<String>> {
