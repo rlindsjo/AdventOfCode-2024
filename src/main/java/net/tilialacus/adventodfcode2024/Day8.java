@@ -26,6 +26,11 @@ public class Day8 {
                 .filter(TRUE::equals)
                 .count());
 
+        System.err.println("Day 8 part 2: " + Arrays.stream(calculateAntinodesWithHarmonics(map, groupedAntennas))
+                .flatMap(Arrays::stream)
+                .filter(TRUE::equals)
+                .count());
+
     }
 
     private static Boolean[][] calculateAntinodes(char[][] map, HashMap<Character, List<Antenna>> groupedAntennas) {
@@ -36,10 +41,9 @@ public class Day8 {
                     if (current == antenna) {
                         continue;
                     }
-                    var aRow = current.row - (antenna.row - current.row);
-                    var aCol = current.col - (antenna.col - current.col);
-                    if (aRow >= 0 && aCol >= 0 && aRow < map.length && aCol < map[0].length) {
-                        antinodes[aRow][aCol] = true;
+                    Antenna a = current.offset(current.row - antenna.row, current.col - antenna.col);
+                    if (onMap(map, a)) {
+                        antinodes[a.row][a.col] = true;
                     }
                 }
             }
@@ -47,5 +51,37 @@ public class Day8 {
         return antinodes;
     }
 
-    private record Antenna(char frequwency, int row, int col) {}
+    private static Boolean[][] calculateAntinodesWithHarmonics(char[][] map, HashMap<Character, List<Antenna>> groupedAntennas) {
+        var antinodes = new Boolean[map.length][map[0].length];
+        for (List<Antenna> antennas : groupedAntennas.values()) {
+            for (Antenna antenna : antennas) {
+                for (Antenna current : antennas) {
+                    if (current == antenna) {
+                        continue;
+                    }
+
+                    var dRow = current.row - antenna.row;
+                    var dCol = current.col - antenna.col;
+
+                    for (Antenna a = current.offset(dRow, dCol); onMap(map, a); a = a.offset(dRow, dCol)) {
+                        antinodes[a.row][a.col] = true;
+                    }
+                    for (Antenna a = current.offset(-dRow, -dCol); onMap(map, a); a = a.offset(-dRow, -dCol)) {
+                        antinodes[a.row][a.col] = true;
+                    }
+                }
+            }
+        }
+        return antinodes;
+    }
+
+    private static boolean onMap(char[][] map, Antenna a) {
+        return a.row >= 0 && a.col >= 0 && a.row < map.length && a.col < map[0].length;
+    }
+
+    private record Antenna(char frequency, int row, int col) {
+        Antenna offset(int drow, int dcol) {
+            return new Antenna(frequency, row + drow, col + dcol);
+        }
+    }
 }
