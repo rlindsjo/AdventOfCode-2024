@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ScanInput {
     public static void scanInput(String name, Consumer<Scanner> consumer) {
@@ -33,5 +34,14 @@ public class ScanInput {
         return Arrays.stream(line.split("\\s+"))
                 .mapToLong(Long::parseLong)
                 .toArray();
+    }
+
+    public static String inputAsSingleLine(String name) {
+        Path path = Path.of(name);
+        try (var stream = Files.lines(path)){
+            return stream.collect(Collectors.joining());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
