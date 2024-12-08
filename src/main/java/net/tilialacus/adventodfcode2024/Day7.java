@@ -4,8 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import static java.lang.Long.parseLong;
-import static net.tilialacus.adventodfcode2024.Day7.Operator.ADD;
-import static net.tilialacus.adventodfcode2024.Day7.Operator.MULTIPLY;
+import static net.tilialacus.adventodfcode2024.Day7.Operator.*;
 import static net.tilialacus.adventodfcode2024.ScanInput.mapInput;
 import static net.tilialacus.adventodfcode2024.ScanInput.splitToLong;
 
@@ -21,6 +20,11 @@ public class Day7 {
 
         System.err.println("Day 7 part 1: " + equations.stream()
                 .filter(equation -> test(EnumSet.of(ADD, MULTIPLY), equation, equation.terms[0], 1))
+                .mapToLong(Equation::result)
+                .sum());
+
+        System.err.println("Day 7 part 2: " + equations.stream()
+                .filter(equation -> test(EnumSet.of(ADD, MULTIPLY, CONCATENATE), equation, equation.terms[0], 1))
                 .mapToLong(Equation::result)
                 .sum());
     }
@@ -41,12 +45,14 @@ public class Day7 {
 
     enum Operator {
         ADD,
-        MULTIPLY;
+        MULTIPLY,
+        CONCATENATE;
 
         public long apply(long left, long right) {
             return switch (this) {
                 case ADD -> left + right;
                 case MULTIPLY -> left * right;
+                case CONCATENATE -> left * (long) Math.pow(10, (long)Math.log10(right) + 1) + right;
             };
         }
     }
