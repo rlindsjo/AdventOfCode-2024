@@ -1,6 +1,5 @@
 package net.tilialacus.adventodfcode2024;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 
 import static net.tilialacus.adventodfcode2024.ScanInput.inputAsSingleLine;
@@ -9,40 +8,25 @@ public class Day9 {
 
     public static void main(String[] args) {
         var line = inputAsSingleLine("src/main/resources/input-9.txt");
-        var diskSize = line.chars()
+        int diskSize = line.chars()
                 .map(it -> it - '0')
                 .sum();
-        var mem = new int[diskSize];
-        Arrays.fill(mem, -1); // Mark as free
-        int index = 0;
-        int memindex = 0;
-        int fileId = 0;
-        while (index < line.length()) {
-            var fileSize = line.charAt(index++) - '0';
-            Arrays.fill(mem, memindex, memindex+fileSize, fileId);
-            memindex += fileSize;
-            if (index + 1 < line.length()) {
-                var free = line.charAt(index++) - '0';
-                memindex += free;
-            }
-            fileId++;
-        }
 
-        int freePtr = nextFree(mem, 0);
-        int memPtr = nextUsed(mem, mem.length -1);
+        var disk = new Disk(diskSize);
+        disk.loadMap(line);
+        compress(disk);
+        System.err.println("Day 9 part 1: " + disk.checksum());
+    }
+
+    private static void compress(Disk disk) {
+        int freePtr = nextFree(disk.storage, 0);
+        int memPtr = nextUsed(disk.storage, disk.storage.length -1);
         while (freePtr < memPtr) {
-            mem[freePtr] = mem[memPtr];
-            mem[memPtr] = -1;
-            freePtr = nextFree(mem, freePtr);
-            memPtr = nextUsed(mem, memPtr);
+            disk.storage[freePtr] = disk.storage[memPtr];
+            disk.storage[memPtr] = -1;
+            freePtr = nextFree(disk.storage, freePtr);
+            memPtr = nextUsed(disk.storage, memPtr);
         }
-
-        BigDecimal checksum = BigDecimal.ZERO;
-        for (int i = 0; mem[i] != -1; i++) {
-            System.err.println(i +" " + mem[i] + " " + mem[i] * i);
-            checksum = checksum.add(BigDecimal.valueOf((long)mem[i] * i));
-        }
-        System.err.println(checksum);
     }
 
     private static int nextUsed(int[] mem, int index) {
@@ -57,5 +41,44 @@ public class Day9 {
             index++;
         }
         return index;
+    }
+
+    private static class Disk {
+        private final int[] storage;
+
+        public Disk(int size) {
+            storage = new int[size];
+            Arrays.fill(storage, -1); // Mark as free
+        }
+
+        public int writeFile(int fileId, int pos, int fileSize) {
+            Arrays.fill(storage, pos, pos+fileSize, fileId);
+            return pos+fileSize;
+        }
+
+        public long checksum() {
+            long checksum = 0;
+            for (int i = 0; i < storage.length; i++) {
+                if (storage[i] != -1) {
+                    checksum += storage[i] * i;
+                }
+            }
+            return checksum;
+        }
+
+        public void loadMap(String map) {
+            int mapIndex = 0;
+            int pos = 0;
+            int fileId = 0;
+            while (mapIndex < map.length()) {
+                var fileSize = map.charAt(mapIndex++) - '0';
+                pos = writeFile(fileId, pos, fileSize);
+                if (mapIndex + 1 < map.length()) {
+                    var free = map.charAt(mapIndex++) - '0';
+                    pos += free;
+                }
+                fileId++;
+            }
+        }
     }
 }
