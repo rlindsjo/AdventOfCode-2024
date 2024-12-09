@@ -8,47 +8,87 @@ public class Day9 {
 
     public static void main(String[] args) {
         var line = inputAsSingleLine("src/main/resources/input-9.txt");
-        int diskSize = line.chars()
-                .map(it -> it - '0')
-                .sum();
-
-        var disk = new Disk(diskSize);
+        var disk = new Disk(line);
         disk.loadMap(line);
-        compress(disk);
+        compressBlocks(disk);
         System.err.println("Day 9 part 1: " + disk.checksum());
+
+        disk = new Disk(line);
+        disk.loadMap(line);
+        compressFiles(disk);
+        System.err.println("Day 9 part 2: " + disk.checksum());
     }
 
-    private static void compress(Disk disk) {
-        int freePtr = nextFree(disk.storage, 0);
-        int memPtr = nextUsed(disk.storage, disk.storage.length -1);
-        while (freePtr < memPtr) {
-            disk.storage[freePtr] = disk.storage[memPtr];
-            disk.storage[memPtr] = -1;
-            freePtr = nextFree(disk.storage, freePtr);
-            memPtr = nextUsed(disk.storage, memPtr);
+    private static void compressBlocks(Disk disk) {
+        var freeSegment = nextFree(disk.storage, 0);
+        var file = nextFile(disk.storage, disk.storage.length -1);
+        while (freeSegment.start < file.start) {
+            disk.moveBlock(file.end, freeSegment.start);
+            disk.free(file.end);
+            freeSegment = nextFree(disk.storage, freeSegment.start);
+            file = nextFile(disk.storage, file.end);
         }
     }
 
-    private static int nextUsed(int[] mem, int index) {
-        while (index >= 0 && mem[index] == -1) {
-            index--;
+    private static void compressFiles(Disk disk) {
+        var file = nextFile(disk.storage, disk.storage.length -1);
+        while (file.start() > 0) {
+            var freeSegment = nextFree(disk.storage, 0);
+            while (freeSegment.size() < file.size() && freeSegment.before(file)) {
+                freeSegment = nextFree(disk.storage, freeSegment.end + 1);
+            }
+            if (freeSegment.before(file)) {
+                disk.move(file, freeSegment);
+                disk.free(file);
+            }
+            file = nextFile(disk.storage, file.start - 1);
         }
-        return index;
     }
 
-    private static int nextFree(int[] mem, int index) {
-        while (index < mem.length && mem[index] != -1) {
-            index++;
+    private static Region nextFile(int[] mem, int index) {
+        var end = index;
+        while (end >= 0 && mem[end] == -1) {
+            end--;
         }
-        return index;
+        var start = end;
+        while (start >= 0 && mem[start] == mem[end]) {
+            --start;
+        }
+        return new Region(start + 1,  end);
     }
 
+    private static Region nextFree(int[] mem, int index) {
+        int start = index;
+        while (start < mem.length && mem[start] != -1) {
+            ++start;
+        }
+        int end = start;
+        while (end < mem.length && mem[end] == -1) {
+            ++end;
+        }
+        return new Region(start, end - 1);
+    }
+
+    private record Region(int start, int end) {
+        public int size() {
+            return end - start + 1;
+        }
+
+        public boolean before(Region region) {
+            return start <= region.start;
+        }
+    }
     private static class Disk {
         private final int[] storage;
 
-        public Disk(int size) {
-            storage = new int[size];
+        public Disk(String map) {
+            int diskSize = map.chars()
+                    .map(it -> it - '0')
+                    .sum();
+
+            storage = new int[diskSize];
             Arrays.fill(storage, -1); // Mark as free
+            loadMap(map);
         }
 
         public int writeFile(int fileId, int pos, int fileSize) {
@@ -79,6 +119,22 @@ public class Day9 {
                 }
                 fileId++;
             }
+        }
+
+        public void moveBlock(int from, int to) {
+            storage[to] = storage[from];
+        }
+
+        public void free(int pos) {
+            storage[pos] = -1;
+        }
+
+        public void move(Region from, Region to) {
+            System.arraycopy(storage, from.start(), storage, to.start(), from.size());
+        }
+
+        public void free(Region region) {
+            Arrays.fill(storage, region.start(), region.end() + 1, -1);
         }
     }
 }
