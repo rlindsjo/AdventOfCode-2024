@@ -25,12 +25,12 @@ public class Day6 {
 
         var possible = 0L;
         for (int row = 0; row < visited.length; row++) {
-            next: for (int col = 0; col < visited.length; col++) {
+            for (int col = 0; col < visited.length; col++) {
                 if (visited[row][col] == TRUE) {
                     var futureGuard = findGuard(map);
                     if ("#^>v<".indexOf(map[row][col]) == -1) {
                         map[row][col] = '#';
-                        int maxSteps = map.length * map[0].length;
+                        int maxSteps = map.length * map[0].length * 4; // every node 4 times
                         while (futureGuard.move(map) && --maxSteps> 0) {}
                         if (maxSteps == 0) {
                             possible++;
