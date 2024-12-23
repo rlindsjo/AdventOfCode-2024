@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,6 +43,15 @@ public class ScanInput {
         Path path = Path.of(name);
         try (var stream = Files.lines(path)){
             return stream.collect(Collectors.joining());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<String> inputAsLines(String name) {
+        Path path = Path.of(name);
+        try {
+            return Files.readAllLines(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
