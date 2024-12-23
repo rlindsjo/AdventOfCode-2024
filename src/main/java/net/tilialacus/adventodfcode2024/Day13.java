@@ -10,9 +10,7 @@ import static net.tilialacus.adventodfcode2024.ScanInput.inputAsLines;
 public class Day13 {
 
     public static void main(String[] args) {
-
         String lines = inputAsLines("src/main/resources/input-13.txt").stream().collect(Collectors.joining("\n"));
-// Prize: X=4729, Y=5725
         Pattern pattern = Pattern.compile("Button A: X\\+(\\d+), Y\\+(\\d+)\\nButton B: X\\+(\\d+), Y\\+(\\d+)\\nPrize: X=(\\d+), Y=(\\d+)", Pattern.MULTILINE);
         var matcher = pattern.matcher(lines);
         var problems = new ArrayList<Problem>();
