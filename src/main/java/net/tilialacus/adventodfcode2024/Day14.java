@@ -42,6 +42,18 @@ public class Day14 {
                 .mapToInt(List::size)
                 .reduce(1, (a,b) -> a * b);
         System.err.println("Day 14 safety factor: " + safety);
+
+        // Assume we have no overlap to form tree
+        var time = 0;
+        while(true) {
+            var frozenTime = ++time;
+            if (robots.stream()
+                    .map(it -> it.atTime(frozenTime, width, height))
+                            .distinct().count() == robots.size()) {
+                break;
+            }
+        }
+        System.err.println("Day 14 seconds: " + time);
     }
 
     record Robot(XY p, XY v) {
