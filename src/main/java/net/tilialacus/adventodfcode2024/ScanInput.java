@@ -68,6 +68,17 @@ public class ScanInput {
         }
     }
 
+    public static Map inputAsMap(String name) {
+        Path path = Path.of(name);
+        try {
+            return new Map(Files.lines(path)
+                    .map(String::toCharArray)
+                    .toArray(char[][]::new));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <T> Stream<T> mapInput(String name, Function<String, T> mapper) {
         Path path = Path.of(name);
         try {
