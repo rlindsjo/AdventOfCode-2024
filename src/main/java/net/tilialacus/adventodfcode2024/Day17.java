@@ -1,8 +1,6 @@
 package net.tilialacus.adventodfcode2024;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Day17 {
@@ -18,21 +16,60 @@ public class Day17 {
         while (computer.pc < computer.mem.length) {
             computer.step();
         }
-        System.err.println("IC: " + computer.ic + " A: " + computer.a + " B: " + computer.b + " C: " + computer.c);
+
         System.err.println(computer.out.stream().map(String::valueOf).collect(Collectors.joining(",")));
+
+        // Try to match end and then trying one octet at a time
+        // Each octet generates one output
+        // Skipping 0 as starting as that can not grow
+        Queue<Long> candidates = new LinkedList<>();
+        for (long i = 1; i < 8; i++) {
+            candidates.add(i);
+        }
+        while (!candidates.isEmpty()) {
+            var c = candidates.remove() * 8;
+            loop: for (long a = c; a < c + 8; a++) {
+                computer.reset();
+                computer.a = a;
+                while (computer.pc < computer.mem.length) {
+                    computer.step();
+                }
+                for (int i = 0; i < computer.out.size(); i++) {
+                    if (!computer.out.get(i).equals(computer.mem[computer.mem.length + i - computer.out.size()])) {
+                        continue loop;
+                    }
+                }
+                if (computer.out.size() == computer.mem.length) {
+                    System.err.println("Day 17 part 2 possible seed " + a);
+                } else {
+                    candidates.add(a);
+                }
+            }
+        }
     }
 
+    private static String reverse(String text) {
+        return new StringBuilder(text).reverse().toString();
+    }
+
+
     static class Computer {
-        int a;
-        int b;
-        int c;
+        long a;
+        long b;
+        long c;
         int pc;
-        int ic = 0;
         int[] mem;
         List<Integer> out = new ArrayList<>();
 
+        void reset() {
+            a = 0;
+            b = 0;
+            c = 0;
+            pc = 0;
+            out.clear();
+        }
+
         void step() {
-            ic ++;
             var opcode = mem[pc];
 
             var literal = mem[pc + 1];
@@ -51,7 +88,7 @@ public class Day17 {
                 case 2: b = combo & 7; break;
                 case 3: if (a != 0) pc = literal; break;
                 case 4: b = b ^ c; break;
-                case 5: out.add(combo & 7); break;
+                case 5: out.add((int) (combo & 7)); break;
                 case 6: b = a >> combo; break;
                 case 7: c = a >> combo; break;
                 default : throw new IllegalStateException("Unexpected value: " + opcode);
