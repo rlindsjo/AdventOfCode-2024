@@ -24,6 +24,19 @@ public class ScanInput {
         }
     }
 
+    public static void scanInput(String name, String delimiter, Consumer<Scanner> consumer) {
+        try {
+            Path path = Path.of(name);
+            Scanner scanner = new Scanner(path);
+            scanner.useDelimiter(delimiter);
+            while (scanner.hasNextLine()) {
+                consumer.accept(scanner);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void inputAsLines(String name, Consumer<String> consumer) {
         Path path = Path.of(name);
         try (var stream = Files.lines(path)){
@@ -36,6 +49,12 @@ public class ScanInput {
     public static long[] splitToLong(String line) {
         return Arrays.stream(line.split("\\s+"))
                 .mapToLong(Long::parseLong)
+                .toArray();
+    }
+
+    public static int[] splitToInt(String line) {
+        return Arrays.stream(line.split("\\s+|,"))
+                .mapToInt(Integer::parseInt)
                 .toArray();
     }
 
