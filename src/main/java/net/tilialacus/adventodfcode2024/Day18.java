@@ -5,21 +5,23 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
+import static net.tilialacus.adventodfcode2024.Map.Pos.pos;
+
 public class Day18 {
     public static void main(String[] args) {
-        Map.Pos start = new Map.Pos(0, 0);
-        var exit = new Map.Pos(70, 70);
+        Map.Pos start = pos(0, 0);
+        var exit = pos(70, 70);
         var map1 = blankMap();
         ScanInput.inputAsLines("src/main/resources/input-18.txt").stream()
                 .limit(1024)
-                .map(ScanInput::splitToInt)
-                .forEach(pos -> map1.setTile(pos[1], pos[0], '#'));
-        System.err.println("Day 18 part 1 path length : " + findPath(map1, start, exit));
+                .map(ScanInput::parseColRow)
+                .forEach(pos -> map1.setTile(pos, '#'));
+        System.err.println("Day 18 part 1 path length : " + findPath(map1, start, exit).length());
 
         var map2 = blankMap();
         for (String line : ScanInput.inputAsLines("src/main/resources/input-18.txt")) {
-            var pos = ScanInput.splitToInt(line);
-            map2.setTile(pos[1], pos[0], '#');
+            var pos = ScanInput.parseColRow(line);
+            map2.setTile(pos, '#');
             var path = findPath(map2, start, exit);
             if (path == null) {
                 System.err.println("Day 18 part 2 last byte : " + line);
@@ -29,8 +31,7 @@ public class Day18 {
     }
 
     private static Map blankMap() {
-        var map = new Map(71, 71, '.');
-        return map;
+        return new Map(71, 71, '.');
     }
 
     private static Map.Path findPath(Map map, Map.Pos start, Map.Pos exit) {

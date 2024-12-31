@@ -43,8 +43,8 @@ public class Map {
         return tiles[pos.row][pos.col];
     }
 
-    public void setTile(int row, int col, char tile) {
-        tiles[row][col] = tile;
+    public void setTile(Pos pos, char tile) {
+        tiles[pos.row()][pos.col()] = tile;
     }
 
     public boolean onMap(Pos pos) {
@@ -52,6 +52,10 @@ public class Map {
     }
 
     public record Pos(int row, int col) {
+
+        static Pos pos(int row, int col) {
+            return new Pos(row, col);
+        }
         Pos right() {
             return new Pos(row, col + 1);
         }
@@ -98,6 +102,15 @@ public class Map {
                 return 0;
             } else {
                 return 1 + prev().length();
+            }
+        }
+
+        @Override
+        public String toString() {
+            if (prev == null) {
+                return pos().toString();
+            } else {
+                return prev + "->" + pos().toString();
             }
         }
     }

@@ -11,6 +11,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Integer.parseInt;
+import static net.tilialacus.adventodfcode2024.Map.Pos.pos;
+
 public class ScanInput {
     public static void scanInput(String name, Consumer<Scanner> consumer) {
         try {
@@ -56,6 +59,11 @@ public class ScanInput {
         return Arrays.stream(line.split("\\s+|,"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
+    }
+
+    public static Map.Pos parseColRow(String line) {
+        String[] split = line.split("\\s+|,");
+        return pos(parseInt(split[1]), parseInt(split[0]));
     }
 
     public static String inputAsSingleLine(String name) {
