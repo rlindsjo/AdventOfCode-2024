@@ -1,6 +1,8 @@
 package net.tilialacus.adventodfcode2024;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static net.tilialacus.adventodfcode2024.ScanInput.inputAsLines;
@@ -12,36 +14,35 @@ public class Day19 {
         var inventory = Arrays.stream(lines.get(0).split(", ")).collect(Collectors.toSet());
 
         var possibleCount = 0;
+        long count = 0;
         for (int i = 2; i < lines.size(); i++) {
-            var pattern = lines.get(i);
-            if (isPossible(inventory, pattern)) {
+            long possible = countPossible(inventory, lines.get(i), new ConcurrentHashMap<>());
+            count += possible;
+            if (possible > 0) {
                 possibleCount++;
             }
         }
         System.err.println("Day 19 part 1 patterns possible:" + possibleCount);
+        System.err.println("Day 19 part 1 pattern combinations:" + count);
     }
 
-    private static boolean isPossible(Set<String> inventory, String pattern) {
-        Queue<String> possible = new PriorityQueue<>(Comparator.comparing(String::length).reversed());
+    private static long countPossible(Set<String> inventory, String pattern, ConcurrentHashMap<String, Long> cache) {
+        if (pattern.isEmpty()) {
+            return 1L; // Done
+        }
 
+        var cached = cache.get(pattern);
+        if (cached != null) {
+            return cached;
+        }
+        long sum = 0;
         for (String part : inventory) {
             if (pattern.startsWith(part)) {
-                possible.add(pattern.substring(part.length()));
+                sum += countPossible(inventory, pattern.substring(part.length()), cache);
             }
         }
-        while (!possible.isEmpty()) {
-            var assembly = possible.remove();
-            for (String part : inventory) {
-                if (assembly.equals(part)) {
-                    return true;
-                } else if (assembly.startsWith(part)) {
-                    String substring = assembly.substring(part.length());
-                    if (!possible.contains(substring)) {
-                        possible.add(substring);
-                    }
-                }
-            }
-        }
-        return false;
+        cache.put(pattern, sum);
+
+        return sum;
     }
 }
